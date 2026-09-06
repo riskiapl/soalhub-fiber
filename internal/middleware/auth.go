@@ -36,14 +36,19 @@ func Protected() fiber.Handler {
 		return c.Next()
 	}
 }
-
-func AdminOnly() fiber.Handler {
+func RolesAllowed(allowedRoles ...string) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		role, ok := c.Locals("role").(string)
-		if !ok || role != "admin" {
-			return utils.ErrorResponse(c, fiber.StatusForbidden, "Access denied. Admins only.")
+		userRole, ok := c.Locals("role").(string)
+		if !ok {
+			return utils.ErrorResponse(c, fiber.StatusForbidden, "User role not found")
 		}
 
-		return c.Next()
+		for _, role := range allowedRoles {
+			if userRole == role {
+				return c.Next()
+			}
+		}
+
+		return utils.ErrorResponse(c, fiber.StatusForbidden, "Access denied")
 	}
 }

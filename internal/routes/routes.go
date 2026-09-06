@@ -15,17 +15,24 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 	api := app.Group("/api/v1")
 
+	// =============== Authentication Routes ===============
 	auth := api.Group("/auth")
 	auth.Post("/register", userHandler.Register)
 	auth.Post("/login", userHandler.Login)
 	auth.Post("/refresh", userHandler.RefreshToken)
 
-	userGroup := api.Group("/users", middleware.Protected())
+	// =============== User Management Routes ===============
+	protected := api.Group("/users", middleware.Protected())
 
-	userGroup.Get("/:id", userHandler.GetUserByID)
-
-	adminGroup := api.Group("/admin", middleware.Protected(), middleware.AdminOnly())
+	// =============== Admin Routes ===============
+	adminGroup := protected.Group("/admin", middleware.RolesAllowed("admin"))
 
 	adminUserGroup := adminGroup.Group("/users")
 	adminUserGroup.Get("", userHandler.GetAllUsers)
+
+	// =============== Teacher Routes ===============
+	// teacherGroup := protected.Group("/teacher", middleware.RolesAllowed("teacher"))
+
+	// =============== Student Routes ===============
+	// studentGroup := protected.Group("/student", middleware.RolesAllowed("student"))
 }

@@ -59,16 +59,8 @@ func (h *UserHandler) Register(c fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	if req.Name == "" || req.Email == "" || req.Password == "" || req.Role == "" {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Name, email, password, and role fields are required")
-	}
-
-	if req.Role != "teacher" && req.Role != "student" {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Role must be either 'teacher' or 'student'")
-	}
-
-	if req.Password != "" && len(req.Password) < 6 {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Password must be at least 6 characters long")
+	if err := utils.ValidateStruct(req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, utils.FormatValidationError(err))
 	}
 
 	res, err := h.service.Register(req)
