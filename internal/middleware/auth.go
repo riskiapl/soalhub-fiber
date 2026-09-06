@@ -26,7 +26,7 @@ func Protected() fiber.Handler {
 			return utils.ErrorResponse(c, fiber.StatusUnauthorized, err.Error())
 		}
 
-		if claims.TokenTYpe != "access" {
+		if claims.TokenType != "access" {
 			return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Invalid token type")
 		}
 

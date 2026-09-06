@@ -76,15 +76,20 @@ func (h *UserHandler) Register(c fiber.Ctx) error {
 // ================ User Management Handlers ================
 func (h *UserHandler) GetUserByID(c fiber.Ctx) error {
 	idParam := c.Params("id")
-
-	userID, err := strconv.ParseUint(idParam, 10, 64)
+	targetID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
 	}
 
-	user := h.service.GetUserByID(uint(userID))
-	if user == nil {
-		return utils.ErrorResponse(c, fiber.StatusNotFound, "User not found")
+	userID, _ := c.Locals("userID").(uint)
+	role, _ := c.Locals("role").(string)
+
+	user, err := h.service.GetUserByID(uint(targetID), userID, role)
+	if err != nil {
+		if err.Error() == "unauthorized access" {
+			return utils.ErrorResponse(c, fiber.StatusForbidden, err.Error())
+		}
+		return utils.ErrorResponse(c, fiber.StatusNotFound, err.Error())
 	}
 
 	return utils.SuccessResponse(c, fiber.StatusOK, "User retrieved successfully", user)
@@ -107,10 +112,13 @@ func (h *UserHandler) GetAllUsers(c fiber.Ctx) error {
 
 func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
 	idParam := c.Params("id")
-	userID, err := strconv.ParseUint(idParam, 10, 64)
+	targetID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
 	}
+
+	userID, _ := c.Locals("userID").(uint)
+	role, _ := c.Locals("role").(string)
 
 	var req UpdateUserRequest
 	if err := c.Bind().Body(&req); err != nil {
@@ -121,8 +129,11 @@ func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, utils.FormatValidationError(err))
 	}
 
-	res, err := h.service.UpdateUser(uint(userID), req)
+	res, err := h.service.UpdateUser(uint(targetID), userID, role, req)
 	if err != nil {
+		if err.Error() == "unauthorized access" {
+			return utils.ErrorResponse(c, fiber.StatusForbidden, err.Error())
+		}
 		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -131,13 +142,19 @@ func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
 
 func (h *UserHandler) DeleteUser(c fiber.Ctx) error {
 	idParam := c.Params("id")
-	userID, err := strconv.ParseUint(idParam, 10, 64)
+	targetID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
 	}
 
-	err = h.service.DeleteUser(uint(userID))
+	userID, _ := c.Locals("userID").(uint)
+	role, _ := c.Locals("role").(string)
+
+	err = h.service.DeleteUser(uint(targetID), userID, role)
 	if err != nil {
+		if err.Error() == "unauthorized access" {
+			return utils.ErrorResponse(c, fiber.StatusForbidden, err.Error())
+		}
 		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
 	}
 

@@ -13,9 +13,9 @@ type UserService interface {
 	RefreshToken(req RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Register(req RegisterRequest) (*UserResponse, error)
 	GetAllUsers(param UserQueryParam) (*UserListResponse, error)
-	GetUserByID(userID uint) *UserResponse
-	UpdateUser(userID uint, req UpdateUserRequest) (*UserResponse, error)
-	DeleteUser(userID uint) error
+	GetUserByID(targetID uint, userID uint, role string) (*UserResponse, error)
+	UpdateUser(targetID uint, userID uint, role string, req UpdateUserRequest) (*UserResponse, error)
+	DeleteUser(targetID uint, userID uint, role string) error
 }
 
 type userService struct {
@@ -62,7 +62,7 @@ func (s *userService) RefreshToken(req RefreshTokenRequest) (*RefreshTokenRespon
 		return nil, errors.New("invalid refresh token")
 	}
 
-	if claims.TokenTYpe != "refresh" {
+	if claims.TokenType != "refresh" {
 		return nil, errors.New("invalid refresh token")
 	}
 
@@ -132,7 +132,7 @@ func (s *userService) GetAllUsers(param UserQueryParam) (*UserListResponse, erro
 
 	totalPages := (totalItems + int64(limit) - 1) / int64(limit)
 
-	if page > int(totalPages) {
+	if totalPages > 0 && page > int(totalPages) {
 		return nil, errors.New("page number exceeds total pages")
 	}
 
@@ -147,41 +147,44 @@ func (s *userService) GetAllUsers(param UserQueryParam) (*UserListResponse, erro
 	}, nil
 }
 
-func (s *userService) GetUserByID(userID uint) *UserResponse {
-	user, err := s.repo.FindByID(userID)
-	if err != nil {
-		return nil
+func (s *userService) GetUserByID(targetID uint, userID uint, role string) (*UserResponse, error) {
+	if role != "admin" && targetID != userID {
+		return nil, errors.New("unauthorized access")
 	}
 
-	return &UserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
-	}
-}
-
-func (s *userService) UpdateUser(userID uint, req UpdateUserRequest) (*UserResponse, error) {
-	user, err := s.repo.FindByID(userID)
+	user, err := s.repo.FindByID(targetID)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 
-	if req.Name != nil {
-		user.Name = *req.Name
+	response := ToUserResponse(*user)
+	return &response, nil
+}
+
+func (s *userService) UpdateUser(targetID uint, userID uint, role string, req UpdateUserRequest) (*UserResponse, error) {
+	if role != "admin" && targetID != userID {
+		return nil, errors.New("unauthorized access")
 	}
 
-	if req.Email != nil && *req.Email != user.Email {
-		existingUser, _ := s.repo.FindByEmail(*req.Email)
-		if existingUser != nil && existingUser.ID != userID {
+	user, err := s.repo.FindByID(targetID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	if role != "admin" && req.Role != user.Role {
+		return nil, errors.New("unauthorized to change role")
+	}
+
+	if req.Email != user.Email {
+		existingUser, _ := s.repo.FindByEmail(req.Email)
+		if existingUser != nil && existingUser.ID != targetID {
 			return nil, errors.New("email already registered")
 		}
-		user.Email = *req.Email
 	}
 
-	if req.Role != nil {
-		user.Role = *req.Role
-	}
+	user.Name = req.Name
+	user.Email = req.Email
+	user.Role = req.Role
 
 	err = s.repo.Update(user)
 	if err != nil {
@@ -192,8 +195,12 @@ func (s *userService) UpdateUser(userID uint, req UpdateUserRequest) (*UserRespo
 	return &response, nil
 }
 
-func (s *userService) DeleteUser(userID uint) error {
-	user, err := s.repo.FindByID(userID)
+func (s *userService) DeleteUser(targetID uint, userID uint, role string) error {
+	if role != "admin" && targetID != userID {
+		return errors.New("unauthorized access")
+	}
+
+	user, err := s.repo.FindByID(targetID)
 	if err != nil {
 		return errors.New("user not found")
 	}

@@ -5,13 +5,15 @@ import (
 	"os"
 	"time"
 
+	fiber "github.com/gofiber/fiber/v3"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWTClaims struct {
 	UserID    uint   `json:"user_id"`
 	Role      string `json:"role"`
-	TokenTYpe string `json:"token_type"`
+	TokenType string `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
@@ -27,7 +29,7 @@ func GenerateAccessToken(userID uint, role string) (string, error) {
 	claims := JWTClaims{
 		UserID:    userID,
 		Role:      role,
-		TokenTYpe: "access",
+		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -42,7 +44,7 @@ func GenerateRefreshToken(userID uint, role string) (string, error) {
 	claims := JWTClaims{
 		UserID:    userID,
 		Role:      role,
-		TokenTYpe: "refresh",
+		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -70,4 +72,11 @@ func ValidateToken(tokenString string) (*JWTClaims, error) {
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+func GetCurrentUserID(c fiber.Ctx) (uint, string) {
+	userID, _ := c.Locals("userID").(uint)
+	role, _ := c.Locals("role").(string)
+
+	return userID, role
 }

@@ -79,7 +79,7 @@ type UserListResponse struct {
 }
 
 type UpdateUserRequest struct {
-	Name  *string `json:"name" validate:"omitempty"`
-	Email *string `json:"email" validate:"omitempty,email"`
-	Role  *string `json:"role" validate:"omitempty,oneof=teacher student"`
+	Name  string `json:"name" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
+	Role  string `json:"role" validate:"required,oneof=teacher student"`
 }
