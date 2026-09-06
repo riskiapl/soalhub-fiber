@@ -81,5 +81,5 @@ type UserListResponse struct {
 type UpdateUserRequest struct {
 	Name  string `json:"name" validate:"required"`
 	Email string `json:"email" validate:"required,email"`
-	Role  string `json:"role" validate:"required,oneof=teacher student"`
+	Role  string `json:"role" validate:"required,oneof=admin teacher student"`
 }
