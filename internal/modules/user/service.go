@@ -36,12 +36,12 @@ func (s *userService) GetAllUsers() ([]UserResponse, error) {
 func (s *userService) Login(req LoginRequest) (*LoginResponse, error) {
 	user, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, errors.New("wrong email or password")
+		return nil, errors.New("email not registered")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		return nil, errors.New("wrong email or password")
+		return nil, errors.New("invalid password")
 	}
 
 	// 3. Generate JWT Token

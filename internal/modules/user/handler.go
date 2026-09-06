@@ -22,8 +22,8 @@ func (h *UserHandler) Login(c fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	if req.Email == "" || req.Password == "" {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Email and password are required")
+	if err := utils.ValidateStruct(req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, utils.FormatValidationError(err))
 	}
 
 	res, err := h.service.Login(req)
@@ -40,8 +40,8 @@ func (h *UserHandler) RefreshToken(c fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	if req.RefreshToken == "" {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Refresh token is required")
+	if err := utils.ValidateStruct(req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, utils.FormatValidationError(err))
 	}
 
 	res, err := h.service.RefreshToken(req)

@@ -19,7 +19,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	AuthRoutes(api, userHandler)
 
 	// =============== User Management Routes ===============
-	protected := api.Group("/users", middleware.Protected())
+	protected := api.Group("/", middleware.Protected())
 
 	// =============== Admin Routes ===============
 	AdminRoutes(protected, userHandler)
