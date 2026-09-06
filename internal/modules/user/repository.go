@@ -8,6 +8,7 @@ type UserRepository interface {
 	FindByID(id uint) (*User, error)
 	Create(user *User) error
 	Update(user *User) error
+	Delete(id uint) error
 }
 
 type userRepository struct {
@@ -95,4 +96,8 @@ func (r *userRepository) Create(user *User) error {
 
 func (r *userRepository) Update(user *User) error {
 	return r.db.Save(user).Error
+}
+
+func (r *userRepository) Delete(id uint) error {
+	return r.db.Delete(&User{}, id).Error
 }

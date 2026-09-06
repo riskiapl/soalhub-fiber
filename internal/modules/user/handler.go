@@ -130,8 +130,16 @@ func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
 }
 
 func (h *UserHandler) DeleteUser(c fiber.Ctx) error {
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "User deleted successfully",
-	})
+	idParam := c.Params("id")
+	userID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	err = h.service.DeleteUser(uint(userID))
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "User deleted successfully", nil)
 }

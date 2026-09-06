@@ -15,6 +15,7 @@ type UserService interface {
 	GetAllUsers(param UserQueryParam) (*UserListResponse, error)
 	GetUserByID(userID uint) *UserResponse
 	UpdateUser(userID uint, req UpdateUserRequest) (*UserResponse, error)
+	DeleteUser(userID uint) error
 }
 
 type userService struct {
@@ -189,4 +190,18 @@ func (s *userService) UpdateUser(userID uint, req UpdateUserRequest) (*UserRespo
 
 	response := ToUserResponse(*user)
 	return &response, nil
+}
+
+func (s *userService) DeleteUser(userID uint) error {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	err = s.repo.Delete(user.ID)
+	if err != nil {
+		return errors.New("failed to delete user")
+	}
+
+	return nil
 }
