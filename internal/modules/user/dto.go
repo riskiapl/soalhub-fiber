@@ -56,3 +56,24 @@ type RegisterRequest struct {
 	Password string `json:"password" validate:"required,min=6"`
 	Role     string `json:"role" validate:"required,oneof=teacher student"`
 }
+
+type UserQueryParam struct {
+	ID    uint   `query:"id"`
+	Name  string `query:"name"`
+	Email string `query:"email"`
+	Role  string `query:"role"`
+	Page  int    `query:"page"`
+	Limit int    `query:"limit"`
+}
+
+type MetaPagination struct {
+	CurrentPage int `json:"current_page"`
+	TotalPages  int `json:"total_pages"`
+	Limit       int `json:"limit"`
+	TotalItems  int `json:"total_items"`
+}
+
+type UserListResponse struct {
+	Users []UserResponse `json:"users"`
+	Meta  MetaPagination `json:"meta"`
+}

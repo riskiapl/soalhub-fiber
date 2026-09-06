@@ -82,12 +82,18 @@ func (h *UserHandler) GetUserByID(c fiber.Ctx) error {
 }
 
 func (h *UserHandler) GetAllUsers(c fiber.Ctx) error {
-	users, err := h.service.GetAllUsers()
+	var param UserQueryParam
+
+	if err := c.Bind().Query(&param); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid query parameters")
+	}
+
+	res, err := h.service.GetAllUsers(param)
 	if err != nil {
 		return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to retrieve users")
 	}
 
-	return utils.SuccessResponse(c, fiber.StatusOK, "All users retrieved successfully", users)
+	return utils.SuccessResponse(c, fiber.StatusOK, "All users retrieved successfully", res)
 }
 
 func (h *UserHandler) UpdateUser(c fiber.Ctx) error {

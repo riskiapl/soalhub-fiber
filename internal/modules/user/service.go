@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	GetAllUsers() ([]UserResponse, error)
+	GetAllUsers(param UserQueryParam) (*UserListResponse, error)
 	Login(req LoginRequest) (*LoginResponse, error)
 	RefreshToken(req RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Register(req RegisterRequest) (*UserResponse, error)
@@ -23,14 +23,37 @@ func NewUserService(repo UserRepository) UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) GetAllUsers() ([]UserResponse, error) {
-	users, err := s.repo.FindAll()
+func (s *userService) GetAllUsers(param UserQueryParam) (*UserListResponse, error) {
+	users, totalItems, err := s.repo.FindAll(param)
 	if err != nil {
 		return nil, err
 	}
 
-	userResponses := ToUserResponseList(users)
-	return userResponses, nil
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	totalPages := (totalItems + int64(limit) - 1) / int64(limit)
+
+	if page > int(totalPages) {
+		return nil, errors.New("page number exceeds total pages")
+	}
+
+	return &UserListResponse{
+		Users: ToUserResponseList(users),
+		Meta: MetaPagination{
+			CurrentPage: page,
+			TotalPages:  int(totalPages),
+			Limit:       limit,
+			TotalItems:  int(totalItems),
+		},
+	}, nil
 }
 
 func (s *userService) Login(req LoginRequest) (*LoginResponse, error) {

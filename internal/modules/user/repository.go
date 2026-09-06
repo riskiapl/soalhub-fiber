@@ -3,7 +3,7 @@ package user
 import "gorm.io/gorm"
 
 type UserRepository interface {
-	FindAll() ([]User, error)
+	FindAll(param UserQueryParam) ([]User, int64, error)
 	FindByEmail(email string) (*User, error)
 	FindByID(id uint) (*User, error)
 	Create(user *User) error
@@ -23,15 +23,52 @@ func (r *userRepository) Create(user *User) error {
 }
 
 // =============== User Management ===============
-func (r *userRepository) FindAll() ([]User, error) {
+func (r *userRepository) FindAll(param UserQueryParam) ([]User, int64, error) {
 	var users []User
-	result := r.db.Find(&users).Error
+	var totalItems int64
 
-	if result != nil {
-		return nil, result
+	query := r.db.Model(&User{})
+
+	if param.ID > 0 {
+		query = query.Where("id = ?", param.ID)
 	}
 
-	return users, nil
+	if param.Name != "" {
+		query = query.Where("name ILIKE ?", "%"+param.Name+"%")
+	}
+
+	if param.Email != "" {
+		query = query.Where("email ILIKE ?", "%"+param.Email+"%")
+	}
+
+	if param.Role != "" {
+		query = query.Where("role = ?", param.Role)
+	}
+
+	// Get total count
+	err := query.Count(&totalItems).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	offset := (page - 1) * limit
+
+	err = query.Order("id ASC").Offset(offset).Limit(limit).Find(&users).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, totalItems, nil
 }
 
 func (r *userRepository) FindByEmail(email string) (*User, error) {

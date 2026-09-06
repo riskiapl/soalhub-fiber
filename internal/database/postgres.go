@@ -33,6 +33,15 @@ func Connect() *gorm.DB {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
 	}
 
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS pg_trgm;").Error; err != nil {
+		log.Fatalf("Gagal mengaktifkan ekstensi pg_trgm: %v", err)
+	}
+
+	createIndexSQL := `CREATE INDEX IF NOT EXISTS idx_users_name_trgm ON users USING gin (name gin_trgm_ops);`
+	if err := db.Exec(createIndexSQL).Error; err != nil {
+		log.Printf("Warning: Failed to create GIN trigram index on users.name: %v", err)
+	}
+
 	SeedAdmin(db)
 
 	log.Println("Connected to the database successfully")
