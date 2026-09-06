@@ -7,6 +7,7 @@ type UserRepository interface {
 	FindByEmail(email string) (*User, error)
 	FindByID(id uint) (*User, error)
 	Create(user *User) error
+	Update(user *User) error
 }
 
 type userRepository struct {
@@ -15,11 +16,6 @@ type userRepository struct {
 
 func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
-}
-
-// =============== Authentication ===============
-func (r *userRepository) Create(user *User) error {
-	return r.db.Create(user).Error
 }
 
 // =============== User Management ===============
@@ -91,4 +87,12 @@ func (r *userRepository) FindByID(id uint) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *userRepository) Create(user *User) error {
+	return r.db.Create(user).Error
+}
+
+func (r *userRepository) Update(user *User) error {
+	return r.db.Save(user).Error
 }

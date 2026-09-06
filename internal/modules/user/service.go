@@ -9,10 +9,12 @@ import (
 )
 
 type UserService interface {
-	GetAllUsers(param UserQueryParam) (*UserListResponse, error)
 	Login(req LoginRequest) (*LoginResponse, error)
 	RefreshToken(req RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Register(req RegisterRequest) (*UserResponse, error)
+	GetAllUsers(param UserQueryParam) (*UserListResponse, error)
+	GetUserByID(userID uint) *UserResponse
+	UpdateUser(userID uint, req UpdateUserRequest) (*UserResponse, error)
 }
 
 type userService struct {
@@ -23,39 +25,7 @@ func NewUserService(repo UserRepository) UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) GetAllUsers(param UserQueryParam) (*UserListResponse, error) {
-	users, totalItems, err := s.repo.FindAll(param)
-	if err != nil {
-		return nil, err
-	}
-
-	page := param.Page
-	if page <= 0 {
-		page = 1
-	}
-
-	limit := param.Limit
-	if limit <= 0 {
-		limit = 10
-	}
-
-	totalPages := (totalItems + int64(limit) - 1) / int64(limit)
-
-	if page > int(totalPages) {
-		return nil, errors.New("page number exceeds total pages")
-	}
-
-	return &UserListResponse{
-		Users: ToUserResponseList(users),
-		Meta: MetaPagination{
-			CurrentPage: page,
-			TotalPages:  int(totalPages),
-			Limit:       limit,
-			TotalItems:  int(totalItems),
-		},
-	}, nil
-}
-
+// ================ Authentication ================
 func (s *userService) Login(req LoginRequest) (*LoginResponse, error) {
 	user, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
@@ -136,6 +106,85 @@ func (s *userService) Register(req RegisterRequest) (*UserResponse, error) {
 	err = s.repo.Create(user)
 	if err != nil {
 		return nil, errors.New("failed to create user")
+	}
+
+	response := ToUserResponse(*user)
+	return &response, nil
+}
+
+// ================ User Management ================
+func (s *userService) GetAllUsers(param UserQueryParam) (*UserListResponse, error) {
+	users, totalItems, err := s.repo.FindAll(param)
+	if err != nil {
+		return nil, err
+	}
+
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	totalPages := (totalItems + int64(limit) - 1) / int64(limit)
+
+	if page > int(totalPages) {
+		return nil, errors.New("page number exceeds total pages")
+	}
+
+	return &UserListResponse{
+		Users: ToUserResponseList(users),
+		Meta: MetaPagination{
+			CurrentPage: page,
+			TotalPages:  int(totalPages),
+			Limit:       limit,
+			TotalItems:  int(totalItems),
+		},
+	}, nil
+}
+
+func (s *userService) GetUserByID(userID uint) *UserResponse {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil
+	}
+
+	return &UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+		Role:  user.Role,
+	}
+}
+
+func (s *userService) UpdateUser(userID uint, req UpdateUserRequest) (*UserResponse, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	if req.Name != nil {
+		user.Name = *req.Name
+	}
+
+	if req.Email != nil && *req.Email != user.Email {
+		existingUser, _ := s.repo.FindByEmail(*req.Email)
+		if existingUser != nil && existingUser.ID != userID {
+			return nil, errors.New("email already registered")
+		}
+		user.Email = *req.Email
+	}
+
+	if req.Role != nil {
+		user.Role = *req.Role
+	}
+
+	err = s.repo.Update(user)
+	if err != nil {
+		return nil, errors.New("failed to update user")
 	}
 
 	response := ToUserResponse(*user)

@@ -1,6 +1,8 @@
 package user
 
 import (
+	"strconv"
+
 	fiber "github.com/gofiber/fiber/v3"
 
 	"soalhub/pkg/utils"
@@ -73,12 +75,19 @@ func (h *UserHandler) Register(c fiber.Ctx) error {
 
 // ================ User Management Handlers ================
 func (h *UserHandler) GetUserByID(c fiber.Ctx) error {
-	userID := c.Params("id")
+	idParam := c.Params("id")
 
-	return utils.SuccessResponse(c, fiber.StatusOK, "User retrieved successfully", fiber.Map{
-		"id":   userID,
-		"name": "John Doe",
-	})
+	userID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	user := h.service.GetUserByID(uint(userID))
+	if user == nil {
+		return utils.ErrorResponse(c, fiber.StatusNotFound, "User not found")
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "User retrieved successfully", user)
 }
 
 func (h *UserHandler) GetAllUsers(c fiber.Ctx) error {
@@ -97,10 +106,27 @@ func (h *UserHandler) GetAllUsers(c fiber.Ctx) error {
 }
 
 func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "User updated successfully",
-	})
+	idParam := c.Params("id")
+	userID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	var req UpdateUserRequest
+	if err := c.Bind().Body(&req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := utils.ValidateStruct(req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, utils.FormatValidationError(err))
+	}
+
+	res, err := h.service.UpdateUser(uint(userID), req)
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "User updated successfully", res)
 }
 
 func (h *UserHandler) DeleteUser(c fiber.Ctx) error {

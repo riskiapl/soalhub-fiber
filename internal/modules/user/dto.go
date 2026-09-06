@@ -77,3 +77,9 @@ type UserListResponse struct {
 	Users []UserResponse `json:"users"`
 	Meta  MetaPagination `json:"meta"`
 }
+
+type UpdateUserRequest struct {
+	Name  *string `json:"name" validate:"omitempty"`
+	Email *string `json:"email" validate:"omitempty,email"`
+	Role  *string `json:"role" validate:"omitempty,oneof=teacher student"`
+}
