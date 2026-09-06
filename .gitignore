@@ -1,0 +1,72 @@
+# ==========================================
+# Binary & Build Outputs
+# ==========================================
+# Tempat penampungan binary sementara (diubah oleh Air atau go build)
+/tmp/
+*.exe
+*.exe-e
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/bin/
+
+# ==========================================
+# Environment & Secrets (SANGAT PENTING)
+# ==========================================
+# Berkas konfigurasi rahasia
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Air (Hot Reload)
+# ==========================================
+# Berkas internal Air jika dibuat
+tmp/
+air.log
+
+# ==========================================
+# Database & Storage lokal
+# ==========================================
+# Folder data PostgreSQL/MySQL lokal dari Docker mount
+/data/
+/pgdata/
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# IDEs & Code Editors
+# ==========================================
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# GoLand / JetBrains
+.idea/
+
+# Editor Linux / Terminal
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Operating System Files
+# ==========================================
+# Linux / CachyOS
+.directory
+
+# macOS
+.DS_Store
+
+# ==========================================
+# Go Dependency Cache
+# ==========================================
+# Hanya abaikan jika kamu menggunakan vendor folder
+/vendor/
