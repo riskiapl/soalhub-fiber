@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/v1/admin/users?page=1&limit=5&email=&role=student"
+  url: "{{baseUrl}}/api/v1/admin/users?page=1&limit=5"
   params:
     - name: page
       value: "1"
@@ -20,12 +20,14 @@ http:
     - name: email
       value: ""
       type: query
+      disabled: true
     - name: role
       value: student
       type: query
+      disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoic3R1ZGVudCIsInRva2VuX3R5cGUiOiJhY2Nlc3MiLCJleHAiOjE3ODg3MDM3ODMsImlhdCI6MTc4ODcwMjg4M30.YlhYrD7M1YvUuniZYmSBbOms66nzwxzGC_1Fhn5TdMg
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg5MTQ1MjE0LCJpYXQiOjE3ODkxNDQzMTR9.aoW-GAOEV3Rcnge9EI_nmnqWEbb6KUupuFNt7Yz_0pc
 
 settings:
   encodeUrl: true
