@@ -1,0 +1,23 @@
+info:
+  name: update
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/users/4"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Siti Rahmawati Edited",
+        "email": "siti.student@soalhub.com",
+        "role": "student"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

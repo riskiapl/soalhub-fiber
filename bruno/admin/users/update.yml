@@ -1,0 +1,24 @@
+info:
+  name: update
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v1/admin/users/3"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Budi Pratama Edited"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg4Njk1MjQ5LCJpYXQiOjE3ODg2OTQzNDl9.o-bCHxpB-LCQZ1qKUXO8Wxc6Rcj24_bt3TTdCrgcAkI
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

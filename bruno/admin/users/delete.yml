@@ -1,0 +1,18 @@
+info:
+  name: delete
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/admin/users/3"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg4Njk3MzIzLCJpYXQiOjE3ODg2OTY0MjN9.KJKfGt5yKIJ2Q-PZD8rIeH2QAwvJBO2QY--O-wIAJAM
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

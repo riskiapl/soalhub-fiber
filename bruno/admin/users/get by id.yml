@@ -1,0 +1,18 @@
+info:
+  name: get by id
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/admin/users/3"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg4NjkzNTk0LCJpYXQiOjE3ODg2OTI2OTR9.a1A07T_ngu2GNvdYorrH_1e84smpw70Hkz3jDVX3O0U
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

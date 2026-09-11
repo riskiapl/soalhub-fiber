@@ -1,0 +1,5 @@
+name: devServer
+variables:
+  - name: baseUrl
+    value: soalhub.my.id
+    description: ""

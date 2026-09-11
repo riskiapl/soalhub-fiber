@@ -1,0 +1,35 @@
+info:
+  name: get all
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/admin/users?page=1&limit=5&email=&role=student"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: limit
+      value: "5"
+      type: query
+    - name: id
+      value: "1"
+      type: query
+      disabled: true
+    - name: email
+      value: ""
+      type: query
+    - name: role
+      value: student
+      type: query
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoic3R1ZGVudCIsInRva2VuX3R5cGUiOiJhY2Nlc3MiLCJleHAiOjE3ODg3MDM3ODMsImlhdCI6MTc4ODcwMjg4M30.YlhYrD7M1YvUuniZYmSBbOms66nzwxzGC_1Fhn5TdMg
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
