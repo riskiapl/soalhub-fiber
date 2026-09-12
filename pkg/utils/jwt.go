@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"os"
+	"soalhub/internal/modules/user"
 	"time"
 
 	fiber "github.com/gofiber/fiber/v3"
@@ -11,9 +12,9 @@ import (
 )
 
 type JWTClaims struct {
-	UserID    uint   `json:"user_id"`
-	Role      string `json:"role"`
-	TokenType string `json:"token_type"`
+	UserID    uint      `json:"user_id"`
+	Role      user.Role `json:"role"`
+	TokenType string    `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
@@ -25,7 +26,7 @@ func getJWTSecret() []byte {
 	return []byte(secret)
 }
 
-func GenerateAccessToken(userID uint, role string) (string, error) {
+func GenerateAccessToken(userID uint, role user.Role) (string, error) {
 	claims := JWTClaims{
 		UserID:    userID,
 		Role:      role,
@@ -40,7 +41,7 @@ func GenerateAccessToken(userID uint, role string) (string, error) {
 	return token.SignedString(getJWTSecret())
 }
 
-func GenerateRefreshToken(userID uint, role string) (string, error) {
+func GenerateRefreshToken(userID uint, role user.Role) (string, error) {
 	claims := JWTClaims{
 		UserID:    userID,
 		Role:      role,
@@ -74,9 +75,9 @@ func ValidateToken(tokenString string) (*JWTClaims, error) {
 	return nil, errors.New("invalid token")
 }
 
-func GetCurrentUserID(c fiber.Ctx) (uint, string) {
+func GetCurrentUserID(c fiber.Ctx) (uint, user.Role) {
 	userID, _ := c.Locals("userID").(uint)
-	role, _ := c.Locals("role").(string)
+	role, _ := c.Locals("role").(user.Role)
 
 	return userID, role
 }
